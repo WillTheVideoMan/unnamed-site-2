@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Dynamic Page!</title>
+<style>
+.layout {
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+    text-align: center;
+}
+.layout_item {
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #888888;
+}
+.layout_item > * {
+    margin: 0;
+    padding: 15px;
+    font-size: 18px;
+    font-size: 1rem;
+}
+.w-6\/12 {
+    width: 50%;
+}
+.w-3\/12 {
+    width: 25%;
+}
+.w-9\/12 {
+    width: 75%;
+}
+.w-4\/12 {
+    width: 33.333333%;
+}
+.w-1\/1 {
+    width: 100%;
+}
+.w-2\/12 {
+    width: 16.666666%;
+}
+.w-8\/12 {
+    width: 66.666666%;
+}
+.w-1\/12 {
+    width: 8.3333333%;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+$( document ).ready( function () {
+	$.ajax( {
+		url: "../JSONMaker.php",
+		method: "GET",
+		success: function ( result ) 
+		{
+			var data = JSON.parse(result);
+			
+			$('#wrapper').html(printElementArray(data));
+			
+			$('#json').html(JSON.stringify(data, null, 2));
+			
+			function printElementArray(data)
+			{
+				var htmlString = "";
+				
+				data.forEach(function(element){
+					
+					htmlString = "<" + element['tag'] + " " + element['attributes'] + ">" + element['content'];
+					
+					element['elements'].forEach(function(contains){
+						
+						htmlString += printElementArray(contains);
+						
+					});
+					
+					htmlString += "</" + element['tag'] + ">";
+					
+				});
+				
+				return htmlString;
+				
+			}
+		}
+	} );
+});
+</script>
+</head>
+
+<body>
+<div class = "wrapper" id = "wrapper"></div>
+	
+<div><h4>PHP HANDLER ($data is database rows array):</h4><pre><code>
+$elementArray = buildElementArray( $data, 1 );
+
+function buildElementArray( $data, $elementIndex ) {
+	$elementIndex = $elementIndex - 1;
+
+	$tempArray = array();
+	
+	array_push($tempArray, array("tag" =&gt; $data[ $elementIndex ][ 2 ], "attributes" =&gt; $data[ $elementIndex ][ 3 ], "content" =&gt; $data[ $elementIndex ][ 4 ], "elements" =&gt; array() ) );
+
+	if ( count( $data[ $elementIndex ][ 1 ] ) &gt; 0 ) {
+		foreach ( $data[ $elementIndex ][ 1 ] as $contains ) {
+			array_push( $tempArray[0][ 'elements' ], buildElementArray( $data, $contains ) );
+		}
+	}
+
+	return $tempArray;
+}
+
+echo( json_encode( $elementArray ) );
+</code></pre></div>
+	
+<div><h4>JAVASCRIPT PARSER (var data is JSON object):</h4><pre><code>
+$('#wrapper').html(printElementArray(data));
+
+function printElementArray(data)
+	{
+		var htmlString = "";
+				
+		data.forEach(function(element){
+					
+			htmlString = "&lt;" + element['tag'] + " " + element['attributes'] + "&gt;" + element['content'];
+					
+			element['elements'].forEach(function(contains){
+						
+				htmlString += printElementArray(contains);
+						
+			});
+					
+			htmlString += "&lt;/" + element['tag'] + "&gt;";
+					
+		});
+				
+		return htmlString;
+				
+	}
+</code></pre></div>
+	
+<div><h4>JSON STRING:</h4><pre><code id = "json"></code></pre></div>
+</body>
+</html>

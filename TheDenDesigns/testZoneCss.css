@@ -1,0 +1,22 @@
+@charset "utf-8";
+
+.loading
+{
+	width:100px;
+	height:100px;
+	margin: auto;
+	
+	border: 8px solid rgba(0,0,0,0.2);
+	border-top: 8px solid rgba(0,0,0,1);
+	border-right: 8px solid rgba(0,0,0,1);
+	
+	border-radius:100%;
+	
+	animation: rotLeft 2s infinite linear;
+}
+
+@keyframes rotLeft
+{
+	0%{transform: rotate(0deg)}
+	100%{transform: rotate(-360deg)}
+}

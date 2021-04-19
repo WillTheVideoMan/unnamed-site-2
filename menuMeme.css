@@ -1,0 +1,177 @@
+@charset "utf-8";
+
+div.settingsTrig
+{
+	z-index:99;
+	position:fixed;
+	top:100%;
+	left:0;
+	margin-top:-62px;
+	margin-left:0px;
+	
+	width:50px;
+	height:50px;
+	border-top-right-radius: 15%;
+	border-bottom-right-radius: 15%;
+	background-color:#C1C1C1;
+	border:none;
+	opacity:0.8;
+	
+	cursor:pointer;
+	
+	transition: all 0.3s ease-in-out;
+}
+
+div.settingsTrig img
+{
+	position:relative;
+	margin-top:2.5px;
+	margin-left:2.5px;
+	opacity:1.0;
+}
+
+div.settingsTrig.hover
+{
+	opacity:1.0;
+	transition: all 0.3s ease-in-out;
+}
+
+div.settingsTrig.active
+{
+	margin-left:300px;
+	opacity:1.0;
+	transition: all 0.4s ease-out;
+}
+
+div.settingsTrig.hover img, .settingsTrig.active img
+{
+	animation: spinner 2s ease-in-out infinite alternate;
+}	
+
+div.sideMenu
+{
+	z-index:98;
+	position:fixed;
+	left:0;
+	top:0;
+	margin-left:-300px;
+	
+	height:100%;
+	width:300px;
+	background-color:#C1C1C1;
+	border:none;
+	
+	transition: all 0.3s ease-in-out;
+}
+
+div.sideMenu.active
+{
+	margin-left:0px;
+	transition: all 0.4s ease-out;
+}
+
+body
+{
+	overflow-x: hidden;
+	transition: all 0.3s ease-out;
+}
+
+body.shifted
+{
+	margin-left:308px;
+	margin-right:-308px;
+	transition: all 0.4s ease-out;
+}
+
+div.sideMenu ul
+{
+	list-style: none;
+	padding-left:0px;
+	margin-top:10px;
+}
+
+div.sideMenu ul li h1
+{
+	color: paleturquoise;
+	font-size:30px;
+	padding:5px;
+	transition: all 0.3s ease-out;
+}
+
+div.sideMenu ul li div
+{
+	display:inline-block;
+	position:relative;
+	z-index: 98;
+	
+	width:60px;
+	height:40px;
+	border:none;
+}
+
+div.sideMenu ul li div:hover
+{
+	animation: focusMe 0.2s alternate infinite;
+}
+
+div.sideMenu ul li div.selected
+{
+	box-sizing: border-box;
+	border:2px solid #FFFFFF;
+	animation: jelly 4s infinite ease-in-out;
+	transition: all 0.2s ease-out;
+}
+
+@keyframes spinner
+{
+	0%{transform: rotate(0deg);}
+	50%{transform: rotate(360deg);}
+	100%{transform: rotate(0deg);}
+}
+
+@keyframes jelly
+{
+	0%{transform: scale(1.0, 1.0)}
+	10%{transform: scale(1.12, 1.12)}
+	20%{transform: scale(1.05, 1.05)}
+	30%{transform: scale(1.08, 1.08)}
+	100%{transform: scale(1.0, 1.0)}
+}
+
+@keyframes focusMe
+{
+	0%{transform: scale(1.0, 1.0)}
+	100%{transform: scale(1.07, 1.07)}
+}
+
+@media only screen and (max-width:654px)
+{
+	body
+	{
+		overflow-x: hidden;
+		transition: all 0.3s ease-out;
+	}
+
+	body.shifted
+	{
+		overflow:hidden;
+		margin-left:0px;
+	    margin-right:0px;
+		transition: all 0.4s ease-out;
+	}
+	
+	.sideMenu
+	{
+		width:100%;
+		margin-left:-100%;
+		transition: all 0.3s ease-in-out;
+	}
+	
+	.settingsTrig.active
+	{
+		margin-left:85%;
+		opacity:1.0;
+		transition: all 0.4s ease-out;
+	}
+	
+}

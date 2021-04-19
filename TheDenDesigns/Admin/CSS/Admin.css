@@ -1,0 +1,104 @@
+@charset "utf-8";
+*
+{
+	font-family: 'Cabin', sans-serif;
+	transition:all 0.1s ease-in-out;
+}
+
+.inText
+{
+	display:block;
+	margin:10px;
+	padding:8px;
+	
+	outline:none;
+	border:2px solid #4A4A4A;
+	border-radius: 5px;
+	
+	text-indent: 5px;
+	font-size:18px;
+}
+
+.inText:focus
+{
+	border-color:#008CFF;
+}
+
+.inText.submitBtn
+{
+	text-align: center;
+	text-indent: 0px;
+	width:100px;
+	height:20px;
+	cursor:pointer;
+	transition: background-color 0.1s ease-in-out;
+}
+
+.inText.submitBtn:hover, .sideSelect ul li:hover, .sideSelect ul li.active
+{
+	background-color: #0054AC;
+	color:white;
+	transition: background-color 0.1s ease-in-out;
+}
+
+.inText.submitBtn.red:hover
+{
+	background-color: red;
+}
+
+.msg
+{
+	color:red;
+	margin-left:10px;
+	font-size:14px;
+}
+
+a
+{
+	text-decoration:none;
+	color:black;
+}
+
+.header
+{
+	margin:11px;
+	padding-bottom: 5px;
+	font-size:24px;
+	border-bottom: 1px solid #C3C3C3;
+}
+
+.sideSelect
+{
+	height:100%;
+	width: 150px;
+	margin-left:-5px;
+	position:fixed;
+	border-right: 1px solid #C3C3C3;
+}
+
+.sideSelect ul
+{
+	margin-top:0px;
+}
+
+.sideSelect ul li
+{
+	list-style: none;
+	text-indent: 0px;
+	padding:10px;
+	border-bottom: 1px solid #C3C3C3;
+	cursor:pointer;
+}
+
+@media only screen and (max-width:625px)
+{
+	.inText
+	{
+		width:90%;
+	}
+	
+	.inText.submitBtn
+	{
+		width:45%;
+	}
+}

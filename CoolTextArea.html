@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Text Area!</title>
+<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+$( document ).ready( function () {
+	
+	var editing = false;
+	
+	$('.editable').click(function(){
+		$('.editable').focus();
+		$('.editable').addClass("selected");
+		editing = true;
+		var str = $('.editable').html();
+		var strCursor = str + "&vert;";
+		$(".editable").html(strCursor);
+	});
+	
+	$('.save').click(function(){
+		if(editing){
+			$('.editable').blur();
+			$('.editable').removeClass("selected");
+			editing = false;
+			var str = $('.editable').html();
+			var strNoCursor = str.substring(0, str.length-1);
+			$(".editable").html(strNoCursor);
+		}
+	});
+	
+	$('html').keydown(function(e){
+		
+		if(editing){
+			
+			var code = e.which;
+			var key = e.key;
+			var str = $('.editable').html();
+			var strNoCursor = str.substring(0, str.length-1);
+			var newStr = "";
+			
+			if(code != 16 
+			   && code != 20 
+			   && code != 17 
+			   && code != 91 
+			   && code != 18 
+			   && code != 93
+			   && code != 13)
+			{
+				if(code == 8 || code == 46)
+				{
+					newStr = strNoCursor.substring(0, strNoCursor.length-1);
+				}
+				else
+				{
+					newStr = strNoCursor + key;
+				}
+				
+				$(".editable").html(newStr + "&vert;");
+			}
+		}
+	});
+});
+</script>
+<style>
+.selected
+{
+	border-bottom:2px solid blue;
+}
+</style>
+</head>
+
+<body>
+<h1 class = "editable" style = "cursor:pointer;font-family:'Source Sans Pro', sans-serif;overflow-wrap: break-word;cursor:text;">Click To Edit This Text!</h1>
+<input type = "button" class = "save" style = "cursor:pointer;font-family:'Source Sans Pro', sans-serif;" value = "Click To Save"/>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!doctype html>
+<html>
+  <head>
+  <link rel="stylesheet" type="text/css" href="cssFirstIdeas.css">
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
+  <script>
+    $(document).ready(function(){
+		
+	 draw();
+	
+   	 $("#bodyDiv").fadeIn(150);
+	  
+	 $("#toConfigure").click(function(){
+     $("#bodyDiv").fadeOut(150);
+	 setTimeout(
+ 		function(){
+    	window.location.href = "../FirstIdeas/Configure.html";
+  		}, 150);
+      });
+	   
+	  for(let i = 1; i < 5; i++)
+	  {
+		$("#tog" + i.toString()).click(function(){
+		   panelSwitch(i);
+    	});
+	  }
+	  
+	  function panelSwitch(target)
+	  {
+		  for(let j = 1; j < 5; j++)
+		   {
+			   if(target != j)
+			   {
+				   $("#pan" + j.toString()).slideUp("fast");
+			   }
+		   }
+		   setTimeout(
+ 		 	function(){
+    			$("#pan" + target.toString()).slideToggle("fast");
+  			}, 75);
+	  }
+	  
+	  function CalculateCoords(meters, yRad, xRad) {
+  		//for a 16300 meter circuit
+  		const DEGPERMETER = 0.0220858896;
+  		//Nice Conversion Constant between deg and rad
+  		const DEGTORADS = Math.PI / 180;
+  		//calculate the number of degrees through which the point moves
+  		var fullDeg = meters * DEGPERMETER;
+
+  		//'If' statement block to find out which quad we are in. Set a multiplier to adjust coords accordingly. Factor in the goofy co-ordinate system too (Where y is inverted. Just why.) Calculate our adjusted quadrant specific angle, measured from the x-axis.
+  		var xMultiplier = 0;
+  		var yMultiplier = 0;
+
+  		var quadDeg = 0;
+
+  		if (fullDeg <= 90) {
+		//adjusted 1st Quad
+    	xMultiplier = -1;
+    	yMultiplier = 1;
+    	//Get adjusted angle
+		quadDeg = 90 - fullDeg;
+	  } else if (fullDeg > 90 && fullDeg <= 180) {
+    	//adjusted 2nd Quad
+		  xMultiplier = -1;
+		  yMultiplier = -1;
+    	//Get adjusted angle
+    	quadDeg = fullDeg - 90;
+  	  } else if (fullDeg > 180 && fullDeg <= 240) {
+    	//adjusted 3rd Quad
+    	xMultiplier = 1;
+    	yMultiplier = -1;
+    	//Get adjusted angle
+    	quadDeg = 270 - fullDeg;
+  	  	} else {
+    	//adjusted 4th Quad
+    	xMultiplier = 1;
+    	yMultiplier = 1;
+    	//Get adjusted angle
+    	quadDeg = fullDeg - 270;
+  	}
+
+  	var quadRad = quadDeg * DEGTORADS;
+
+	var radiusAtPoint =
+    xRad *
+    yRad /
+    Math.sqrt(
+      Math.pow(yRad, 2) * Math.pow(Math.sin(quadRad), 2) +
+        Math.pow(xRad, 2) * Math.pow(Math.cos(quadRad), 2)
+    );
+
+  //Get are final x-coord using some Sine action!
+  var xCoord = radiusAtPoint * Math.cos(quadRad);
+  xCoord *= xMultiplier;
+
+  //Get are final y-coord using some Sine action!
+  var yCoord = radiusAtPoint * Math.sin(quadRad);
+  yCoord *= yMultiplier;
+
+  var returnObj = new Object();
+  returnObj["x"] = xCoord;
+  returnObj["y"] = yCoord;
+  returnObj["rot"] = fullDeg;
+  return returnObj;
+}
+	
+	  function draw() {
+  	var stage = new createjs.Stage("trackingCanvas");
+	stage.enableMouseOver(50);
+ 	var timeLine = new createjs.Shape();
+  	var circle = new createjs.Shape();
+	var checkPoint = new createjs.Shape();
+	var centralText = new createjs.Text("Some Statistics", "50px Source Sans Pro", "black");
+	var checkText = new createjs.Text("", "20px Source Sans Pro", "black");
+	var students = new Array("Harry", "Will", "Jason", "Joe", "Rhys", "Martin");
+	var distance = new Array(1000,3000,5000,8950,9000, 12500);
+	var checkpoints = new Object();
+	checkpoints = {distance: new Array(0, 4300, 8400, 13000), 
+				   initials: new Array("SH", "PB", "WF", "MM", "SF")};
+
+  	timeLine.graphics
+    	.setStrokeStyle(2)
+    	.beginStroke("#000")
+   		.beginFill("#fff")
+    	.drawEllipse(0, 0, stage.canvas.width - 50, stage.canvas.height - 50);
+		timeLine.y = 25;
+  		timeLine.x = 25;
+		stage.addChild(timeLine);
+   	  	stage.update();
+		
+	for (let i = 0; i < 6; i++) { 
+    	var cloneCirc = circle.clone();
+    	cloneCirc.graphics.beginFill("red").drawCircle(0, 0, 5);
+		var pointCoords = CalculateCoords(
+    		distance[i],
+    		(stage.canvas.width - 50) / 2,
+    		(stage.canvas.height - 50) / 2
+  		);
+    	cloneCirc.x = pointCoords["x"] + stage.canvas.width / 2;
+  		cloneCirc.y = pointCoords["y"] + stage.canvas.height / 2;
+		stage.addChild(cloneCirc);
+   	  	stage.update();
+	}
+		
+	for (let i = 0; i < 4; i++) {
+		var cloneCheck = checkPoint.clone();
+		var cloneText = checkText.clone();
+		cloneCheck.graphics.beginFill("#b2b2b2").drawCircle(0, 0, 16);
+		cloneText.text = checkpoints['initials'][i];
+		var pointCoords = CalculateCoords(
+    		checkpoints['distance'][i],
+    		(stage.canvas.width - 50) / 2,
+    		(stage.canvas.height - 50) / 2
+  		);
+    	cloneText.x = pointCoords["x"] + (stage.canvas.width - cloneText.getMeasuredWidth()) / 2;
+		cloneCheck.x = pointCoords["x"] + stage.canvas.width / 2;
+  		cloneText.y = pointCoords["y"] + (stage.canvas.height - cloneText.getMeasuredHeight()) / 2 - 5;
+		cloneCheck.y = pointCoords["y"] + stage.canvas.height / 2;
+		cloneCheck.cursor = "pointer";
+		stage.addChild(cloneCheck, cloneText);
+   	  	stage.update();
+		cloneCheck.addEventListener("click", function() {
+			alert("You clicked on " + checkpoints['initials'][i] +  " oh wow...");
+		});
+	}
+		
+	centralText.x = (stage.canvas.width - centralText.getMeasuredWidth()) / 2;
+	centralText.y = (stage.canvas.height - 80) / 2;
+	stage.addChild(centralText);
+   	stage.update();
+}
+	  
+		
+    });
+	
+	
+
+  </script>
+  </head>
+  <header>
+  <h1>Sponsored Walk!</h1>
+  <nav>
+      <ul>
+      <a class = "MenuSelector">
+        <li class = "active">Overview</li>
+        </a><a class = "MenuSelector" id =  "toConfigure" >
+        <li>Configure</li>
+        </a>
+    </ul>
+    </nav>
+</header>
+
+  <body>
+  <div id = "bodyDiv">
+    <div class = "canvasWrap">
+      <canvas id="trackingCanvas" width="1024" height = "356" style = "background-color:white;"></canvas>
+    </div>
+    <div class = "togglePan top" id = "tog1">
+    	<p><b>1. SH &rArr; PB</b></p>
+    </div>
+    <div class = "panel" id = "pan1">
+    	<p>Panel 1</p>
+        <div class = "canvasWrap"></div>
+    </div>
+    <div class = "togglePan" id = "tog2">
+    	<p><b>2. PB &rArr; WF</b></p>
+    </div>
+    <div class = "panel" id = "pan2">
+    	<p>Panel 2</p>
+        <div class = "canvasWrap"></div>
+    </div>
+    <div class = "togglePan" id = "tog3">
+    	<p><b>3. WF &rArr; MM</b></p>
+    </div>
+    <div class = "panel" id = "pan3">
+    	<p>Panel 3</p>
+        <div class = "canvasWrap"></div>
+    </div>
+    <div class = "togglePan" id = "tog4">
+    	<p><b>4. MM &rArr; SH</b></p>
+    </div>
+    <div class = "panel" id = "pan4">
+    	<p>Panel 4</p>
+        <div class = "canvasWrap"></div>
+    </div>
+  </div>
+</body>
+</html>

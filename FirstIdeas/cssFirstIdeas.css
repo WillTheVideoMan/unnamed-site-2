@@ -1,0 +1,118 @@
+*
+{
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+html { 
+  overflow-y: scroll; 
+}
+
+body, header, .togglePan, .panel
+{
+  min-width: 505px;
+  max-width: 1024px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+body, header
+{
+	width: 100%;
+}
+
+canvas {
+    padding: 0;
+    margin: auto;
+    display: block;
+    width: 100%;
+}
+
+.canvasWrap
+{
+	padding:20px;
+}
+
+#bodyDiv
+{
+    position:relative;
+    top:125px;
+	display:none;
+}
+
+header
+{
+  text-align: center;
+  position: fixed;
+  z-index: 99;
+  background-color: white;
+  top:-10px;
+  padding-bottom:25px;
+  border-bottom:5px solid #d81015;
+}
+
+a
+{
+  color:black;
+}
+
+h1
+{
+  margin-bottom:10px;
+}
+
+ul
+{
+  padding:0px;
+  margin:0px;
+  list-style: none;
+}
+
+nav ul a li
+{
+  font-size: 22px;
+  margin-left: 10px;
+  display:inline-block;
+  width:33%;
+  border-bottom: 5px solid #b2b2b2;
+  cursor:pointer;
+}
+
+nav ul a li.far
+{
+  margin-right:10px;
+}
+
+nav ul a li:hover, nav ul a li.active
+{
+  border-bottom-color: #d81015;
+  transition: border-bottom-color 0.2s ease-in-out;
+}
+
+.togglePan, .panel
+{
+  width:90%;
+  border-bottom: 5px solid #b2b2b2;
+  transition: border-bottom-color 0.2s ease-in-out;
+}
+
+.togglePan
+{
+	cursor:pointer;
+}
+
+.togglePan p, .panel p
+{
+	margin:10px;
+}
+
+.togglePan:hover
+{
+	border-bottom: 5px solid #d81015;
+
+}
+
+.panel
+{
+	display: none;
+	border-bottom: 5px solid #d81015;
+}

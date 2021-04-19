@@ -1,0 +1,17 @@
+@charset "utf-8";
+/* CSS Document */
+
+.veriText
+{
+	border: 3px solid #979797;
+	border-radius: 3px;
+	text-indent:8px;
+	font-size: 24px;
+	width:98px;
+	height:34px;
+	margin:5px;
+	outline:none;
+	transition: all 0.5s ease-in-out;
+}
+
+

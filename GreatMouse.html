@@ -1,0 +1,364 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<script>
+window.onload = function() {
+  var canvas = document.getElementById("myCanvas");
+  var ctx = canvas.getContext("2d");
+  var player = {
+    x: 100,
+    y: 500,
+    size: 6,
+    speed: 4,
+    colour: "red",
+    mags: { xMag: 0, yMag: 0 }
+  };
+  var enemies = [
+    {
+      x: 350,
+      y: 250,
+      size: 6,
+      speed: 4,
+      colour: "green",
+      mags: { xMag: 0.1, yMag: 0.1 }
+    }
+  ];
+  var viewport = { x: 0, y: 0 };
+  var pixelMap = createPixelMap(100);
+  var canvasCenter = { x: 0, y: 0 };
+  var realDimensions = { x: 0, y: 0 };
+  var scores = [];
+
+  //Debug FPS
+  var frameCount = 0;
+  var currentTime = 0;
+  var lastTime = performance.now();
+  var delta = 0;
+  //Debug End
+
+  window.onresize = function() {
+    canvasResize(canvas, canvasCenter, realDimensions);
+  };
+
+  window.onkeypress = function(evt) {
+    if (evt.keyCode == 122) {
+      if (player.size > 2) player.size -= 2;
+      if (player.speed < 10) player.speed += 2;
+    }
+    if (evt.keyCode == 120) {
+      if (player.size < 10) player.size += 2;
+      if (player.speed > 2) player.speed -= 2;
+    }
+  };
+
+  canvas.addEventListener(
+    "mousemove",
+    function(evt) {
+      player.mags = getPlayerMagnitudes(canvas, evt, player, realDimensions);
+    },
+    false
+  );
+
+  canvasResize(canvas, canvasCenter, realDimensions);
+
+  function frame() {
+    currentTime = performance.now();
+    delta = currentTime - lastTime;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    movePlayer(player, delta);
+
+    detectBoundaryCollision(player, pixelMap);
+
+    viewport.x = player.x - canvasCenter.x;
+    viewport.y = player.y - canvasCenter.y;
+
+    paintBackground(ctx, pixelMap, viewport);
+
+    ctx.beginPath();
+    ctx.moveTo(
+      canvasCenter.x - player.size * 5,
+      canvasCenter.y - player.size * 5
+    );
+    ctx.rect(
+      canvasCenter.x - player.size * 5,
+      canvasCenter.y - player.size * 5,
+      player.size * 10,
+      player.size * 10
+    );
+    ctx.fillStyle = player.colour;
+    ctx.fill();
+    ctx.stroke();
+    ctx.closePath();
+
+    appendTrail(pixelMap, player);
+
+    enemies.forEach(function(enemy) {
+      movePlayer(enemy, delta);
+      detectBoundaryCollision(enemy, pixelMap);
+      if (detectEnemyCollision(enemy, player)) {
+        player.x = 50;
+        player.y = 50;
+        player.speed = 4;
+        player.size = 6;
+
+        erasePlayerColour(player);
+
+        scores = updateScores(pixelMap, enemies, player);
+      } else {
+        paintEnemy(ctx, viewport, enemy);
+        appendTrail(pixelMap, enemy);
+      }
+    });
+
+    if (frameCount % 60 == 0) {
+      scores = updateScores(pixelMap, enemies, player);
+
+      //Debug FPS
+      frameCount = 0;
+      console.log(Math.floor(1 / (delta / 1000)));
+      //Debug End
+    }
+
+    paintScoreBar(scores, ctx, canvasCenter);
+
+    frameCount++;
+
+    lastTime = currentTime;
+
+    requestAnimationFrame(frame);
+  }
+
+  function createPixelMap(mapSize) {
+    var arr = new Array(mapSize);
+
+    for (let i = 0; i < mapSize; i++) {
+      arr[i] = new Array(mapSize);
+      for (let j = 0; j < mapSize; j++) {
+        let colour = "#023966";
+        if ((j * i) % 3 == 0) colour = "#034977";
+        arr[i][j] = { x: i * 10, y: j * 10, colour: colour };
+      }
+    }
+    return arr;
+  }
+
+  function paintEnemy(ctx, viewport, enemy) {
+    ctx.beginPath();
+    ctx.moveTo(
+      enemy.x - viewport.x - enemy.size * 5,
+      enemy.y - viewport.y - enemy.size * 5
+    );
+    ctx.rect(
+      enemy.x - viewport.x - enemy.size * 5,
+      enemy.y - viewport.y - enemy.size * 5,
+      enemy.size * 10,
+      enemy.size * 10
+    );
+    ctx.fillStyle = enemy.colour;
+    ctx.fill();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  function appendTrail(pixelMap, player) {
+    var paintParams = { x: 0, y: 0 };
+    paintParams.x = Math.round(player.x / 10);
+    paintParams.y = Math.round(player.y / 10);
+
+    for (i = -player.size / 2; i < player.size / 2; i++) {
+      for (var j = -player.size / 2; j < player.size / 2; j++) {
+        pixelMap[paintParams.x + i][paintParams.y + j].colour = player.colour;
+      }
+    }
+  }
+
+  function movePlayer(player, delta) {
+    player.x += player.mags.xMag * player.speed * delta * 0.08;
+    player.y += player.mags.yMag * player.speed * delta * 0.08;
+  }
+
+  function paintBackground(ctx, pixelMap, viewport) {
+    for (var i = 0; i < pixelMap.length; i++) {
+      for (var j = 0; j < pixelMap[i].length; j++) {
+        if (
+          pixelMap[i][j].x - viewport.x >= -10 &&
+          pixelMap[i][j].y - viewport.y >= -10 &&
+          pixelMap[i][j].x - viewport.x <= canvas.width + 10 &&
+          pixelMap[i][j].y - viewport.y <= canvas.height + 10
+        ) {
+          ctx.fillStyle = pixelMap[i][j].colour;
+          ctx.fillRect(
+            pixelMap[i][j].x - viewport.x,
+            pixelMap[i][j].y - viewport.y,
+            10,
+            10
+          );
+        }
+      }
+    }
+  }
+
+  function getPlayerMagnitudes(canvas, evt, player, realDimensions) {
+    var rect = canvas.getBoundingClientRect();
+    var mousePos = {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+    };
+    var mag = Math.sqrt(
+      Math.pow(mousePos.x - realDimensions.x / 2, 2) +
+        Math.pow(mousePos.y - realDimensions.y / 2, 2)
+    );
+    return {
+      xMag: (mousePos.x - realDimensions.x / 2) / mag,
+      yMag: (mousePos.y - realDimensions.y / 2) / mag
+    };
+    sendMyMags(player);
+  }
+
+  function detectBoundaryCollision(player, pixelMap) {
+    if (player.x - player.size * 5 <= 0) player.x = player.size * 5;
+
+    if (player.x + player.size * 5 >= pixelMap.length * 10)
+      player.x = pixelMap.length * 10 - player.size * 5;
+
+    if (player.y - player.size * 5 <= 0) player.y = player.size * 5;
+
+    if (player.y + player.size * 5 >= pixelMap.length * 10)
+      player.y = pixelMap.length * 10 - player.size * 5;
+  }
+
+  function detectEnemyCollision(enemy, player) {
+    if (
+      player.x + player.size * 5 > enemy.x - enemy.size * 5 &&
+      player.x - player.size * 5 < enemy.x + enemy.size * 5 &&
+      player.y + player.size * 5 > enemy.y - enemy.size * 5 &&
+      player.y - player.size * 5 < enemy.y + enemy.size * 5
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function updateScores(pixelMap, enemies, player) {
+    var scores = [];
+
+    scores.push({ colour: player.colour, score: 0 });
+
+    enemies.forEach(function(enemy) {
+      scores.push({ colour: enemy.colour, score: 0 });
+    });
+
+    for (var i = 0; i < pixelMap.length; i++) {
+      for (var j = 0; j < pixelMap.length; j++) {
+        for (var k = 0; k < scores.length; k++) {
+          if (scores[k].colour == pixelMap[i][j].colour) scores[k].score++;
+        }
+      }
+    }
+    return scores;
+  }
+
+  function paintScoreBar(scores, ctx, canvasCenter) {
+    var rectX = canvasCenter.x - 100;
+    scores.forEach(function(score) {
+      var percent = Math.floor(
+        score.score / (pixelMap.length * pixelMap.length) * 100
+      );
+      ctx.fillStyle = score.colour;
+      ctx.fillRect(rectX, 52.5, percent * 2, 45);
+      rectX += percent * 2;
+    });
+    ctx.rect(canvasCenter.x - 102.5, 50, 205, 50);
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 5;
+    ctx.stroke();
+  }
+
+  function canvasResize(canvas, canvasCenter, realDimensions) {
+    var ratio = 0;
+    var screenRatio = 0;
+
+    if (window.innerHeight < window.innerWidth) {
+      ratio = window.innerHeight / window.innerWidth;
+
+      canvas.width = 750 + 250 / ratio;
+      canvas.height = (750 + 250 / ratio) * ratio;
+
+      screenRatio = window.innerWidth / (750 + 250 / ratio);
+
+      realDimensions.x = canvas.width * screenRatio;
+      realDimensions.y = canvas.height * screenRatio;
+    } else {
+      ratio = window.innerWidth / window.innerHeight;
+
+      canvas.height = 750 + 250 / ratio;
+      canvas.width = (750 + 250 / ratio) * ratio;
+
+      screenRatio = window.innerHeight / (750 + 250 / ratio);
+      realDimensions.x = canvas.width * screenRatio;
+      realDimensions.y = canvas.height * screenRatio;
+    }
+
+    canvasCenter.x = canvas.width / 2;
+    canvasCenter.y = canvas.height / 2;
+
+    canvas.style.width = realDimensions.x + "px";
+    canvas.style.height = realDimensions.y + "px";
+  }
+
+  function erasePlayerColour(player) {
+    for (let i = 0; i < pixelMap.length; i++) {
+      for (let j = 0; j < pixelMap.length; j++) {
+        let colour = "#023966";
+        if ((j * i) % 3 == 0) colour = "#034977";
+        if (pixelMap[i][j].colour == player.colour)
+          pixelMap[i][j].colour = colour;
+      }
+    }
+  }
+
+  function sendMyMags(player) {
+    //Websocket To Rest Of Players...
+  }
+
+  function debounce(func, wait, immediate) {
+    var timeout;
+    return function() {
+      var context = this,
+        args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) func.apply(context, args);
+      };
+      var callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) func.apply(context, args);
+    };
+  }
+
+  requestAnimationFrame(frame);
+};
+</script>
+<style>
+body {
+	margin: 0px;
+	padding: 0px;
+}
+canvas {
+	display:block;
+	overflow:hidden;
+	margin: 0px;
+	padding: 0px;
+}
+</style>
+</head>
+<body>
+<canvas id="myCanvas" style = "background-color:#023966;"></canvas>
+</body>
+</html>
